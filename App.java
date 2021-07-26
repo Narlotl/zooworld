@@ -7,18 +7,18 @@ import javax.swing.plaf.FontUIResource;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.Timer;
-
-import dev.narlotl.rand;
 
 public class App extends JFrame implements ActionListener {
 
     JButton breedButton;
     JButton breedCloseButton;
-    JButton tigerBreedButton;
-    JButton elephantBreedButton;
+    JButton tigerBreedButton = new JButton();
+    JButton elephantBreedButton = new JButton();
     JButton elephantBuyButton;
     JButton zebraBuyButton;
     JButton giraffeBuyButton;
@@ -32,6 +32,7 @@ public class App extends JFrame implements ActionListener {
     JButton monkeySellButton;
     JButton sellCloseButton;
     JButton sellButton;
+    JButton resetButton;
     JLabel label1;
     JLabel label2;
     JLabel label3;
@@ -42,9 +43,9 @@ public class App extends JFrame implements ActionListener {
     JLabel shopLabel4;
     JLabel shopLabel5;
     JLabel shopLabel6;
-    JButton monkeyBreedButton;
-    JButton giraffeBreedButton;
-    JButton zebraBreedButton;
+    JButton monkeyBreedButton = new JButton();
+    JButton giraffeBreedButton = new JButton();
+    JButton zebraBreedButton = new JButton();
     JLabel label4;
     JButton buyButton;
     JLabel label5;
@@ -74,54 +75,81 @@ public class App extends JFrame implements ActionListener {
     int elephants = 2;
     int balance = rand.fromTo(5000, 10000);
 
-    public void tigerBreedEnDis() {
-        TimerTask tigerEnable = new TimerTask() {
-            public void run() {
-                tigerBreedButton.setEnabled(true);
+    protected void exportSave() {
+        File directory = new File("C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\ZooWorld");
+        if (!directory.exists()) {
+            if (directory.mkdir()) {  
             }
+        }
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(directory + "\\ZooWorldSave");
+            writer.write(
+                         Base64.getEncoder().encodeToString(Integer.toString(balance).getBytes()) + "\n" + 
+                         Base64.getEncoder().encodeToString(Integer.toString(tigers).getBytes()) + "\n" + 
+                         Base64.getEncoder().encodeToString(Integer.toString(zebras).getBytes()) + "\n" + 
+                         Base64.getEncoder().encodeToString(Integer.toString(giraffes).getBytes()) + "\n" + 
+                         Base64.getEncoder().encodeToString(Integer.toString(monkeys).getBytes()) + "\n" + 
+                         Base64.getEncoder().encodeToString(Integer.toString(elephants).getBytes()) + "\n" +
+                         Base64.getEncoder().encodeToString(Boolean.toString(tigerBreedButton.isEnabled()).getBytes()) + "\n" +
+                         Base64.getEncoder().encodeToString(Boolean.toString(zebraBreedButton.isEnabled()).getBytes()) + "\n" +
+                         Base64.getEncoder().encodeToString(Boolean.toString(giraffeBreedButton.isEnabled()).getBytes()) + "\n" +
+                         Base64.getEncoder().encodeToString(Boolean.toString(monkeyBreedButton.isEnabled()).getBytes()) + "\n" +
+                         Base64.getEncoder().encodeToString(Boolean.toString(elephantBreedButton.isEnabled()).getBytes())
+                          );
+            writer.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         };
-        tigerBreedButton.setEnabled(false);
-        timer.schedule(tigerEnable, 16 * 2000);
     }
 
-    public void elephantBreedEnDis() {
-        TimerTask elephantEnable = new TimerTask() {
-            public void run() {
-                elephantBreedButton.setEnabled(true);
-            }
-        };
-        elephantBreedButton.setEnabled(false);
-        timer.schedule(elephantEnable, 95 * 2000);
+    protected String decode(String encodedString) {
+        byte[] decodedBytes = Base64.getDecoder().decode(encodedString);
+        String decodedString = new String(decodedBytes);
+        return decodedString;
     }
 
-    public void monkeyBreedEnDis() {
-        TimerTask monkeyEnable = new TimerTask() {
-            public void run() {
-                monkeyBreedButton.setEnabled(true);
+    protected void loadSave() {
+        try {
+            File directory = new File("C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\ZooWorld");
+            File reader = new File(directory + "\\ZooWorldSave");
+            Scanner fileReader = new Scanner(reader);
+            String balanceData = decode(fileReader.nextLine());
+            String tigerData = decode(fileReader.nextLine());
+            String zebraData = decode(fileReader.nextLine());
+            String giraffeData = decode(fileReader.nextLine());
+            String monkeyData = decode(fileReader.nextLine());
+            String elephantData = decode(fileReader.nextLine());
+            boolean tigerEnabled = !Boolean.parseBoolean(decode(fileReader.nextLine()));
+            boolean zebraEnabled = !Boolean.parseBoolean(decode(fileReader.nextLine()));
+            boolean giraffeEnabled = !Boolean.parseBoolean(decode(fileReader.nextLine()));
+            boolean monkeyEnabled = !Boolean.parseBoolean(decode(fileReader.nextLine()));
+            boolean elephantEnabled = !Boolean.parseBoolean(decode(fileReader.nextLine()));
+            balance = Integer.parseInt(balanceData);
+            tigers = Integer.parseInt(tigerData);
+            zebras = Integer.parseInt(zebraData);
+            giraffes = Integer.parseInt(giraffeData);
+            monkeys = Integer.parseInt(monkeyData);
+            elephants = Integer.parseInt(elephantData);
+            if (tigerEnabled) {
+                tigerBreedEnDis();
             }
-        };
-        monkeyBreedButton.setEnabled(false);
-        timer.schedule(monkeyEnable, (35 * 2000));
-    }
-
-    public void giraffeBreedEnDis() {
-        TimerTask giraffeEnable = new TimerTask() {
-            public void run() {
-                giraffeBreedButton.setEnabled(true);
+            if (zebraEnabled) {
+                zebraBreedEnDis();
             }
-        };
-        giraffeBreedButton.setEnabled(false);
-        timer.schedule(giraffeEnable, (16 * 2000));
-    }
-
-    public void zebraBreedEnDis() {
-        TimerTask zebraEnable = new TimerTask() {
-            public void run() {
-                zebraBreedButton.setEnabled(true);
+            if (giraffeEnabled) {
+                giraffeBreedEnDis();
             }
-        };
-        zebraBreedButton.setEnabled(false);
-        timer.schedule(zebraEnable, (13 * 2000));
+            if (monkeyEnabled) {
+                monkeyBreedEnDis();
+            }
+            if (elephantEnabled) {
+                elephantBreedEnDis();
+            }
+            fileReader.close();
+        } catch (Exception e) {
+            
+        }
     }
 
 
@@ -135,6 +163,7 @@ public class App extends JFrame implements ActionListener {
     }
 
     App() {
+        loadSave();
 
         BufferedImage icon = null;
         try {
@@ -180,6 +209,15 @@ public class App extends JFrame implements ActionListener {
         breedButton.setVisible(true);
         breedButton.setToolTipText("Breed your animals");
 
+        resetButton = new JButton();
+        resetButton.setBounds(10, 140, 200, 100);
+        resetButton.setText("Reset");
+        resetButton.addActionListener(this);
+        resetButton.setBackground(buttonColor);
+        resetButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
+        resetButton.setVisible(true);
+        resetButton.setToolTipText("Reset your progress");
+
         buyButton = new JButton();
         buyButton.setBounds(250, 10, 200, 100);
         buyButton.setText("Shop");
@@ -217,7 +255,7 @@ public class App extends JFrame implements ActionListener {
         sellCloseButton.setToolTipText("Close the selling menu");
 
         exitButton = new JButton();
-        exitButton.setBounds(378, 140, 200, 100);
+        exitButton.setBounds(490, 140, 200, 100);
         exitButton.setText("Exit");
         exitButton.addActionListener(this);
         exitButton.setBackground(new Color(232, 28, 9));
@@ -226,7 +264,7 @@ public class App extends JFrame implements ActionListener {
         exitButton.setToolTipText("Exit the game");
 
         helpButton = new JButton();
-        helpButton.setBounds(137, 140, 200, 100);
+        helpButton.setBounds(250, 140, 200, 100);
         helpButton.setText("Help");
         helpButton.addActionListener(this);
         helpButton.setBackground(buttonColor);
@@ -242,7 +280,6 @@ public class App extends JFrame implements ActionListener {
         breedCloseButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
         breedCloseButton.setToolTipText("Close the breeding menu");
 
-        tigerBreedButton = new JButton();
         tigerBreedButton.addActionListener(this);
         tigerBreedButton.setBounds(250, 10, 200, 100);
         tigerBreedButton.setText("Tigers");
@@ -251,7 +288,6 @@ public class App extends JFrame implements ActionListener {
         tigerBreedButton.setVisible(false);
         tigerBreedButton.setToolTipText("Breed tigers");
 
-        elephantBreedButton = new JButton();
         elephantBreedButton.setBounds(490, 10, 200, 100);
         elephantBreedButton.setText("Elephants");
         elephantBreedButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
@@ -260,7 +296,6 @@ public class App extends JFrame implements ActionListener {
         elephantBreedButton.addActionListener(this);
         elephantBreedButton.setToolTipText("Breed elephants");
 
-        monkeyBreedButton = new JButton();
         monkeyBreedButton.setBounds(10, 140, 200, 100);
         monkeyBreedButton.setText("Monkeys");
         monkeyBreedButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
@@ -269,7 +304,6 @@ public class App extends JFrame implements ActionListener {
         monkeyBreedButton.addActionListener(this);
         monkeyBreedButton.setToolTipText("Breed monkeys");
 
-        giraffeBreedButton = new JButton();
         giraffeBreedButton.setBounds(250, 140, 200, 100);
         giraffeBreedButton.setText("Giraffes");
         giraffeBreedButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
@@ -278,7 +312,6 @@ public class App extends JFrame implements ActionListener {
         giraffeBreedButton.addActionListener(this);
         giraffeBreedButton.setToolTipText("Breed giraffes");
 
-        zebraBreedButton = new JButton();
         zebraBreedButton.setBounds(490, 140, 200, 100);
         zebraBreedButton.setText("Zebras");
         zebraBreedButton.setFont(new Font("Papyrus", Font.PLAIN, 25));
@@ -472,6 +505,7 @@ public class App extends JFrame implements ActionListener {
         label5.add(sellButton);
         shopLabel.add(tigerBuyButton);
         label6.add(exitButton);
+        label6.add(resetButton);
         label1.add(elephantBreedButton);
         label2.add(monkeyBreedButton);
         label3.add(giraffeBreedButton);
@@ -492,7 +526,14 @@ public class App extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (e.getSource() == resetButton) {
+            File directory = new File("C:\\Users\\" + System.getProperty("user.name") + "\\AppData\\Local\\ZooWorld\\ZooWorldSave");
+            if (directory.delete()) {
+                dispose();
+                new App();
+            }
+        }
+        
         if (e.getSource() == breedButton) {
             breedButton.setVisible(false);
             breedCloseButton.setVisible(true);
@@ -618,7 +659,7 @@ public class App extends JFrame implements ActionListener {
                     if (monkeyLitterSize >= 1) {
                         monkeys += 2;
                         mainLabel.setText("Congratulations! You now have 2 more monkeys! You currently have " + monkeys + " monkeys.");
-                    } else {
+                    } else{
                         monkeys += 1;
                         mainLabel.setText("Congratulations! You now have 1 more monkey! You currently have " + monkeys + " monkeys.");
                     }
@@ -671,6 +712,7 @@ public class App extends JFrame implements ActionListener {
         }
 
         if (e.getSource() == exitButton) {
+            exportSave();
             System.exit(123456789);
         }
 
@@ -723,8 +765,8 @@ public class App extends JFrame implements ActionListener {
             mainLabel.setText("A tiger will cost $" + price + ". Press the button marked \"Tigers\" to continue.");
                 if(tigerClicks == 1) {
                     if(balance >= price) {
-                        mainLabel.setText("You now have 1 more tiger! Your balance is $" + balance + ".");
                         balance -= price;
+                        mainLabel.setText("You now have 1 more tiger! Your balance is $" + balance + ".");
                         tigers++;
                     }
                     else {
@@ -740,8 +782,8 @@ public class App extends JFrame implements ActionListener {
             mainLabel.setText("An elephant will cost $" + price + ". Press the button marked \"Elephants\" to continue.");
             if(elephantClicks == 1) {
                 if(balance >= price) {
-                    mainLabel.setText("You now have 1 more elephant! Your balance is $" + balance + ".");
                     balance -= price;
+                    mainLabel.setText("You now have 1 more elephant! Your balance is $" + balance + ".");
                     elephants++;
                 }
                 else {
@@ -757,8 +799,8 @@ public class App extends JFrame implements ActionListener {
             mainLabel.setText("A giraffe will cost $" + price + ". Press the button marked \"Giraffes\" to continue.");
             if(giraffeClicks == 1) {
                 if(balance >= price) {
-                    mainLabel.setText("You now have 1 more giraffe! Your balance is $" + balance + ".");
                     balance -= price;
+                    mainLabel.setText("You now have 1 more giraffe! Your balance is $" + balance + ".");
                     giraffes++;
                 }
                 else {
@@ -774,8 +816,8 @@ public class App extends JFrame implements ActionListener {
             mainLabel.setText("A zebra will cost $" + price + ". Press the button marked \"Zebras\" to continue.");
             if(zebraClicks == 1) {
                 if(balance >= price) {
-                    mainLabel.setText("You now have 1 more zebra! Your balance is $" + balance + ".");
                     balance -= price;
+                    mainLabel.setText("You now have 1 more zebra! Your balance is $" + balance + ".");
                     zebras++;
                 }
                 else {
@@ -791,8 +833,8 @@ public class App extends JFrame implements ActionListener {
             mainLabel.setText("A monkey will cost $" + price + ". Press the button marked \"Monkeys\" to continue.");
             if(monkeyClicks == 1) {
                 if(balance >= price) {
-                    mainLabel.setText("You now have 1 more monkey! Your balance is $" + balance + ".");
                     balance -= price;
+                    mainLabel.setText("You now have 1 more monkey! Your balance is $" + balance + ".");
                     monkeys++;
                 }
                 else {
@@ -809,8 +851,8 @@ public class App extends JFrame implements ActionListener {
             if(monkeyClicks == 1) {
                 if(monkeys > 0) {
                     balance += price;
-                    mainLabel.setText("You sold a monkey for $" + price + ". You now have " + monkeys + " monkeys.");
                     monkeys--;
+                    mainLabel.setText("You sold a monkey for $" + price + ". You now have " + monkeys + " monkeys.");
                     monkeyClicks = 0;
                 }
                 else {
@@ -826,8 +868,8 @@ public class App extends JFrame implements ActionListener {
             if(tigerClicks == 1) {
                 if(tigers > 0) {
                     balance += price;
-                    mainLabel.setText("You sold a tiger for $" + price + ". You now have " + tigers + " tigers.");
                     tigers--;
+                    mainLabel.setText("You sold a tiger for $" + price + ". You now have " + tigers + " tigers.");
                     tigerClicks = 0;
                 }
                 else {
@@ -843,8 +885,8 @@ public class App extends JFrame implements ActionListener {
             if(elephantClicks == 1) {
                 if(tigers > 0) {
                     balance += price;
-                    mainLabel.setText("You sold an elephant for $" + price + ". You now have " + elephants + " elephants.");
                     elephants--;
+                    mainLabel.setText("You sold an elephant for $" + price + ". You now have " + elephants + " elephants.");
                     elephantClicks = 0;
                 }
                 else {
@@ -860,8 +902,8 @@ public class App extends JFrame implements ActionListener {
             if(giraffeClicks == 1) {
                 if(giraffes > 0) {
                     balance += price;
-                    mainLabel.setText("You sold a giraffe for $" + price + ". You now have " + giraffes + " giraffes.");
                     giraffes--;
+                    mainLabel.setText("You sold a giraffe for $" + price + ". You now have " + giraffes + " giraffes.");
                     giraffeClicks = 0;
                 }
                 else {
@@ -877,8 +919,8 @@ public class App extends JFrame implements ActionListener {
             if(zebraClicks == 1) {
                 if(zebras > 0) {
                     balance += price;
-                    mainLabel.setText("You sold a zebra for $" + price + ". You now have " + zebras + " zebras.");
                     zebras--;
+                    mainLabel.setText("You sold a zebra for $" + price + ". You now have " + zebras + " zebras.");
                     zebraClicks = 0;
                 }
                 else {
@@ -890,10 +932,59 @@ public class App extends JFrame implements ActionListener {
 
         if (e.getSource() == helpButton) {
             mainLabel.setLocation(10,175);
-            mainLabel.setText("<html><body>You can shop for animals with the \"Shop\" button<br>Sell animals for a slightly lower price with the \"Sell\" button<br>And breed two animals for a chance to get another with the \"Breed\" button</body></html>");
+            mainLabel.setText("<html><body>You can shop for animals with the \"Shop\" button<br>Sell animals for a slightly lower price with the \"Sell\" button<br>And breed two animals for a chance to get another with the \"Breed\" button<br>Background image by MuchMania on iStock</body></html>");
         }
     }
 
+    public void tigerBreedEnDis() {
+        TimerTask tigerEnable = new TimerTask() {
+            public void run() {
+                tigerBreedButton.setEnabled(true);
+            }
+        };
+        tigerBreedButton.setEnabled(false);
+        timer.schedule(tigerEnable, 16 * 2000);
+    }
+
+    public void elephantBreedEnDis() {
+        TimerTask elephantEnable = new TimerTask() {
+            public void run() {
+                elephantBreedButton.setEnabled(true);
+            }
+        };
+        elephantBreedButton.setEnabled(false);
+        timer.schedule(elephantEnable, 95 * 2000);
+    }
+
+    public void monkeyBreedEnDis() {
+        TimerTask monkeyEnable = new TimerTask() {
+            public void run() {
+                monkeyBreedButton.setEnabled(true);
+            }
+        };
+        monkeyBreedButton.setEnabled(false);
+        timer.schedule(monkeyEnable, (35 * 2000));
+    }
+
+    public void giraffeBreedEnDis() {
+        TimerTask giraffeEnable = new TimerTask() {
+            public void run() {
+                giraffeBreedButton.setEnabled(true);
+            }
+        };
+        giraffeBreedButton.setEnabled(false);
+        timer.schedule(giraffeEnable, (16 * 2000));
+    }
+
+    public void zebraBreedEnDis() {
+        TimerTask zebraEnable = new TimerTask() {
+            public void run() {
+                zebraBreedButton.setEnabled(true);
+            }
+        };
+        zebraBreedButton.setEnabled(false);
+        timer.schedule(zebraEnable, (13 * 2000));
+    }
 
     public static void main(String[] args) {
             new App();
